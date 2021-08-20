@@ -1,0 +1,24 @@
+{
+    "name": "iwindy/laravel-permission-helper",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "iwindy",
+            "email": "203962638@qq.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Iwindy\\LaravelPermissionHelper\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "require": {
+        "php": "^7.3|^8.0",
+        "illuminate/auth": "^6|^7|^8",
+        "illuminate/support": "^6|^7|^8",
+        "doctrine/annotations": "^1.13"
+    }
+}

@@ -7,9 +7,15 @@ namespace Iwindy\LaravelPermissionHelper;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Illuminate\Support\Facades\Route;
+use Mnabialek\LaravelVersion\Version;
 
 class PermissionHelper
 {
+    protected $version;
+
+    public function __construct(Version $version){
+        $this->version = $version;
+    }
     /**
      * @throws \ReflectionException
      */
@@ -19,22 +25,26 @@ class PermissionHelper
 
         $nodes = [];
         foreach (Route::getRoutes() as $route) {
-            $controller = $route->getActionName();
-            if ($route->getActionMethod() == 'Closure' || !strpos($controller, '@')) {
+            $controller = $this->getController($route);
+            $method = $this->getMethod($route);
+            if (!$controller || $controller == 'Closure' || !$method || $method == 'Closure') {
                 continue;
             }
-            list($class, $method) = explode('@', $controller);
 
-            $refClass = new \ReflectionClass($class);
+            $refClass = new \ReflectionClass($controller);
             $refMethod = $refClass->getMethod($method);
             $reader = new AnnotationReader();
-            $perm = $reader->getMethodAnnotation($refMethod, Annotation\Permission::class);
             $annotation = $reader->getClassAnnotation($refClass, Annotation\Guard::class);
+            $perm = $reader->getMethodAnnotation($refMethod, Annotation\Permission::class);
+
+            if (!$annotation || !$perm) {
+                continue;
+            }
 
             $nodes[] = [
                 'guard' => $annotation->guard,
                 'menu'  => implode('.', $perm->menu),
-                'name'  => implode('|', $route->methods()) . ':' . $route->uri()
+                'name'  => $this->getPermissionName($route)
             ];
         }
 
@@ -57,7 +67,7 @@ class PermissionHelper
                     $new_notes[$str]['show_name'] = $name;
                 } else {
                     $new_notes[$item['menu']] = [
-                        'guard'      => $item['guard'],
+                        'guard'     => $item['guard'],
                         'menu'      => $item['menu'],
                         'show_name' => $name,
                         'name'      => $item['name']
@@ -80,5 +90,53 @@ class PermissionHelper
             }
         }
         return $tree;
+    }
+
+    protected function getController($route)
+    {
+        if ($this->version->isLaravel()) {
+            $action = $route->getAction();
+            if ($action['prefix'] == '_ignition') {
+                return false;
+            }
+            if (isset($action['controller'])) {
+                return $route->getController();
+            }
+        } else {
+            if (empty($route['action']['uses'])) {
+                return 'Closure';
+            }
+
+            return current(explode("@", $route['action']['uses']));
+
+        }
+        return 'Closure';
+    }
+
+    protected function getMethod($route)
+    {
+        if ($this->version->isLaravel()) {
+            return $route->getActionMethod();
+        } else {
+            if (!empty($route['action']['uses'])) {
+                $data = $route['action']['uses'];
+                if (($pos = strpos($data, "@")) !== false) {
+                    return substr($data, $pos + 1);
+                }
+            }
+            return false;
+        }
+    }
+
+    protected function getPermissionName($route)
+    {
+        if ($this->version->isLaravel()) {
+            if (in_array('GET', $route->methods())) {
+                return 'GET:' . $route->uri();
+            }
+            return $route->methods()[0] . ':' . $route->uri();
+        } else {
+            return $route['method'] . ':' . $route['uri'];
+        }
     }
 }

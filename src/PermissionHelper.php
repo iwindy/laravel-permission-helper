@@ -13,7 +13,8 @@ class PermissionHelper
 {
     protected $version;
 
-    public function __construct(Version $version){
+    public function __construct(Version $version)
+    {
         $this->version = $version;
     }
 
@@ -44,8 +45,8 @@ class PermissionHelper
 
             $nodes[] = [
                 'guard_name' => $annotation->guard,
-                'menu'  => implode('.', $perm->menu),
-                'name'  => $this->getPermissionName($route)
+                'path'       => implode('.', $perm->menu),
+                'name'       => $this->getPermissionName($route)
             ];
         }
 
@@ -56,7 +57,7 @@ class PermissionHelper
     {
         $new_notes = [];
         foreach ($nodes as $item) {
-            $path = explode('.', $item['menu']);
+            $path = explode('.', $item['path']);
             $level_count = count($path);
             $str = '';
             foreach ($path as $k => $v) {
@@ -64,14 +65,14 @@ class PermissionHelper
                 if ($level_count != $k + 1) {
                     $str = trim($str . '.' . $v, '.');
                     $new_notes[$str]['guard_name'] = $item['guard_name'];
-                    $new_notes[$str]['menu'] = $str;
-                    $new_notes[$str]['show_name'] = $name;
+                    $new_notes[$str]['path'] = $str;
+                    $new_notes[$str]['label'] = $name;
                 } else {
-                    $new_notes[$item['menu']] = [
-                        'guard_name'     => $item['guard_name'],
-                        'menu'      => $item['menu'],
-                        'show_name' => $name,
-                        'name'      => $item['name']
+                    $new_notes[$item['path']] = [
+                        'guard_name' => $item['guard_name'],
+                        'path'       => $item['path'],
+                        'label'      => $name,
+                        'name'       => $item['name']
                     ];
                 }
             }

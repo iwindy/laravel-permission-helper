@@ -16,6 +16,7 @@ class PermissionHelper
     public function __construct(Version $version){
         $this->version = $version;
     }
+
     /**
      * @throws \ReflectionException
      */
@@ -42,7 +43,7 @@ class PermissionHelper
             }
 
             $nodes[] = [
-                'guard' => $annotation->guard,
+                'guard_name' => $annotation->guard,
                 'menu'  => implode('.', $perm->menu),
                 'name'  => $this->getPermissionName($route)
             ];
@@ -62,12 +63,12 @@ class PermissionHelper
                 $name = lang('permissions.' . $v);
                 if ($level_count != $k + 1) {
                     $str = trim($str . '.' . $v, '.');
-                    $new_notes[$str]['guard'] = $item['guard'];
+                    $new_notes[$str]['guard_name'] = $item['guard_name'];
                     $new_notes[$str]['menu'] = $str;
                     $new_notes[$str]['show_name'] = $name;
                 } else {
                     $new_notes[$item['menu']] = [
-                        'guard'     => $item['guard'],
+                        'guard_name'     => $item['guard_name'],
                         'menu'      => $item['menu'],
                         'show_name' => $name,
                         'name'      => $item['name']

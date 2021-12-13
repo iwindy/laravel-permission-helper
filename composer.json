@@ -20,6 +20,7 @@
         "illuminate/auth": "^6|^7|^8",
         "illuminate/support": "^6|^7|^8",
         "doctrine/annotations": "^1.13",
-        "mnabialek/laravel-version": "^1.0"
+        "mnabialek/laravel-version": "^1.0",
+        "spatie/laravel-permission": "^4.3"
     }
 }
